@@ -3,6 +3,8 @@ import numpy as np
 from scipy.stats import gumbel_r
 from scipy.optimize import minimize
 import csv
+import pandas as pd
+
 
 def write_to_csv(file,loc,scale):
     with open(file,'a', newline='') as f:
@@ -25,7 +27,17 @@ def estimators(M):
 
     return loc_k, scale_k 
 
-def plot_estimators(file):
-    
+def conv_rates(file,M):
+    df = pd.read_csv('data.csv')
+    locs = df.iloc[:, 0]
+    scale = df.iloc[:, 1]
+    conv_rates_loc = []
+    conv_rates_scale = []
+    return conv_rates_loc,conv_rates_scale
+
+
+def plot_convergence(data):
+    fig = plt.figure((10,10))
+    fig = plt.savefig('conv_rates.png')
 
 estimators(100)
