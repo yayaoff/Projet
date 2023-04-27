@@ -5,7 +5,6 @@ from scipy.optimize import minimize
 import csv
 import pandas as pd
 
-
 def write_to_csv(file,loc,scale):
     with open(file,'a', newline='') as f:
         writer = csv.writer(f)
@@ -28,11 +27,13 @@ def estimators(M):
     return loc_k, scale_k 
 
 def conv_rates(file,M):
+
     df = pd.read_csv('data.csv')
     locs = df.iloc[:, 0]
     scale = df.iloc[:, 1]
     conv_rates_loc = []
     conv_rates_scale = []
+    
     return conv_rates_loc,conv_rates_scale
 
 
