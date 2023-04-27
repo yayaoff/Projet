@@ -4,7 +4,7 @@ from scipy.stats import gumbel_r
 from scipy.optimize import minimize
 import csv
 import pandas as pd
-
+zfr
 def write_to_csv(file,loc,scale):
     with open(file,'a', newline='') as f:
         writer = csv.writer(f)
