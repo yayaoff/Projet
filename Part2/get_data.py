@@ -4,7 +4,7 @@ import os
 # ---------------------------------------------------
 # Global variables
 # ---------------------------------------------------
-N = 100
+N = 100                        # Number of iterations
 DATA_DIR = 'data_files/'
 
 # ---------------------------------------------------
@@ -12,11 +12,11 @@ DATA_DIR = 'data_files/'
 # ---------------------------------------------------
 
 def load_file(filename):
-    return np.loadtxt(filename,delimiter=' ')
+    data = np.loadtxt(filename,delimiter=' ')
+    return data,len(data)
 
 def get_true_data():
-    positions = load_file(DATA_DIR+'True_data.txt')
-    n = len(positions)
+    positions,n = load_file(DATA_DIR+'True_data.txt')
     x_pos = np.zeros(n)
     y_pos = np.zeros(n)
     x_vel = np.zeros(n)
@@ -29,8 +29,7 @@ def get_true_data():
     return x_pos,y_pos,x_vel,y_vel
 
 def get_noisy_obs():
-    noisy_obs = load_file(DATA_DIR+'Observations.txt')
-    n = len(noisy_obs)
+    noisy_obs,n = load_file(DATA_DIR+'Observations.txt')
     x_noisy_obs = np.zeros(n)
     y_noisy_obs = np.zeros(n)
     for i in range(n):
@@ -39,7 +38,8 @@ def get_noisy_obs():
     return x_noisy_obs,y_noisy_obs
 
 def get_white_noise_v(x_true,y_true,x_noisy_obs,y_noisy_obs):
-    n = x_noisy_obs.size
+    # Y = s + v <-> v = Y - s 
+    n = x_true.size
     v_x = np.zeros(n)
     v_y = np.zeros(n)
     for i in range(n):
@@ -48,8 +48,7 @@ def get_white_noise_v(x_true,y_true,x_noisy_obs,y_noisy_obs):
     return v_x,v_y
     
 def get_acc_u():
-    u_input = load_file(DATA_DIR+'Input.txt')
-    n = len(u_input)
+    u_input,n = load_file(DATA_DIR+'Input.txt')
     u_x = np.zeros(n)
     u_y = np.zeros(n)
     for i in range(n):
@@ -61,7 +60,8 @@ def get_acc_u():
 # Get informations
 # -------------------------------------------------------------------------------------------------
 
-x_true,y_true,x_true_vel,y_true_vel = get_true_data()
+n = 100
+x_true_pos,y_true_pos,x_true_vel,y_true_vel = get_true_data()
 x_noisy_obs,y_noisy_obs = get_noisy_obs()
-v_x,v_y = get_white_noise_v(x_true,y_true,x_noisy_obs,y_noisy_obs)
+v_x,v_y = get_white_noise_v(x_true_pos,y_true_pos,x_noisy_obs,y_noisy_obs)
 u_x,u_y = get_acc_u()
