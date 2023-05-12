@@ -60,8 +60,6 @@ def predict(u_k):
                 # X_pred_k = A*X_pred_k-1 + B*u_k + G (mu + beta*gamma, mu + beta*gamma)
     X_k = np.dot(A,X_k) + np.dot(B, u_k) + np.dot(Q,shift_term)
     P = np.dot(np.dot(A, P), A.T) + Q 
-    # P_prexd = A @ P @ A.T + Q - A @ P @ C.T @ np.linalg.inv(C @ P @ C.T + R) @ C @ P @ A.T
-
 def update(y):
     global P
     global X_k
@@ -71,9 +69,16 @@ def update(y):
     X_k = np.add(X_k , np.dot(K,y-np.dot(C,X_k)))
     P = np.subtract(P, np.dot(np.dot(K,C),P))
 
+def MSE_k(k):
+    err = np.array([x_true_pos[k] - X_k[0],y_true_pos[k] - X_k[1]])
+    return np.linalg.norm(err,ord=2)**2 
+
 #------------------------------------
 # Run the filter
 #------------------------------------
+
+MSE = 0
+MSE_arr = np.empty(N-1)
 
 for k in range(1,n):
     u_k = np.array([u_x[k],u_y[k]])
@@ -83,6 +88,11 @@ for k in range(1,n):
     y_k = np.array([x_noisy_obs[k],y_noisy_obs[k]])
     update(y_k)
     X[k] = X_k
+    MSE += MSE_k(k)
+    MSE_arr[k-1] = MSE_k(k)
+
+MSE /= N
+print('MSE = ' + str(MSE))
 
 #------------------------------------
 # 3 : Plots 
@@ -95,5 +105,10 @@ fig = plt.scatter(X.T[0],X.T[1],color='green',label='Filtered state',s=15)
 fig = plt.xlabel('x position',fontsize=15)
 fig = plt.ylabel('y position',fontsize=15)
 fig = plt.legend()
-fig = plt.savefig("plots/kalman.png")
-plt.show()
+fig = plt.savefig("plots/kalman_filter.png")
+# plt.show()
+fig_MSE = plt.figure(figsize=(15,10))
+fig_MSE = plt.title("Kalman Filter MSE",fontsize=20,fontweight='bold')
+fig_MSE = plt.plot(np.arange(0,N-1),MSE_arr)
+fig = plt.savefig("plots/kalman_MSE.png")
+# plt.show()
