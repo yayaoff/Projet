@@ -15,6 +15,7 @@ dt = 0.1                # [sec]
 gamma = 0.5772          # Euler cste
 mu=1                    # Mu parameter for random acceleration Gumbel distribution
 beta=1                  # Beta parameter for random acceleration Gumbel distribution
+#initial state
 X0_moy = 10
 X0 = np.array([X0_moy,X0_moy,X0_moy,X0_moy])
 X_k = X0
@@ -78,7 +79,9 @@ def MSE_k(k):
 #------------------------------------
 
 MSE = 0
-MSE_arr = np.empty(N-1)
+MSE_arr = np.empty(N)
+MSE_arr[0] = MSE_k(0)
+MSE += MSE_k(0)
 
 for k in range(1,n):
     u_k = np.array([u_x[k],u_y[k]])
@@ -89,7 +92,7 @@ for k in range(1,n):
     update(y_k)
     X[k] = X_k
     MSE += MSE_k(k)
-    MSE_arr[k-1] = MSE_k(k)
+    MSE_arr[k] = MSE_k(k)
 
 MSE /= N
 print('MSE = ' + str(MSE))
@@ -109,6 +112,9 @@ fig = plt.savefig("plots/kalman_filter.png")
 # plt.show()
 fig_MSE = plt.figure(figsize=(15,10))
 fig_MSE = plt.title("Kalman Filter MSE",fontsize=20,fontweight='bold')
-fig_MSE = plt.plot(np.arange(0,N-1),MSE_arr)
-fig = plt.savefig("plots/kalman_MSE.png")
+fig_MSE = plt.plot(np.arange(0,N),MSE_arr,label='MSE Kalman filter')
+fig_MSE = plt.xlabel('Iteration',fontsize=15)
+fig_MSE = plt.ylabel('MSE',fontsize=15)
+fig_MSE = plt.legend()
+fig_MSE = plt.savefig("plots/kalman_MSE.png")
 # plt.show()
