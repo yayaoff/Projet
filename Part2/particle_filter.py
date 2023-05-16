@@ -68,15 +68,15 @@ def compute_weights(particles, observations, N):
         if(weights[i]==0):
             weights[i]+=1e-12
 
-    sum = np.sum(weights)
-    if sum ==0:
-        sum += 1e-12
-    weights /= sum #diviser par la norme
+    # sum = np.sum(weights)
+    # if sum ==0:
+    #     sum += 1e-12
+    # weights /= sum #diviser par la norme
     # print(weights)
-    # norm = np.linalg.norm(weights)
-    # if norm ==0:
-    #     norm += 1e-12
-    # weights /= norm
+    norm = np.linalg.norm(weights)
+    if norm ==0:
+        norm += 1e-12
+    weights /= norm
     return weights
 
 def resample(particles, weights):
@@ -153,10 +153,10 @@ beta=1                  # Beta parameter for random acceleration Gumbel distribu
 
 start_time = time.time()
 sol=np.array(particle_filter(input_data,observation_data,dt,N,Np,mean_i,cov_i,mu,beta))
-for i in range(200):
-    sol+=np.array(particle_filter(input_data,observation_data,dt,N,Np,mean_i,cov_i,mu,beta))
+# for i in range(50):
+#     sol+=np.array(particle_filter(input_data,observation_data,dt,N,Np,mean_i,cov_i,mu,beta))
 elapsed_time = time.time() - start_time
-sol/=201
+# sol/=51
 
 mse = np.mean((true_data[:2] - sol[:2]) ** 2)
 print("MSE="+str(mse))
@@ -179,7 +179,7 @@ ax.set_title('Comparison of Particle Filter Solution and True Data')
 ax.legend()
 
 #Save plot
-plt.savefig('plots/particle_nul_2.png')
+plt.savefig('plots/particle_nul_4.png')
 
 # Show the plot
 # plt.show()
