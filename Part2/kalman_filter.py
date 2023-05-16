@@ -2,6 +2,7 @@ from get_data import *
 import numpy as np
 from math import pi
 import matplotlib.pyplot as plt
+import time
 
 # ----------------------------------------------------------------------------------
 # Kalman filter 
@@ -86,7 +87,7 @@ MSE = 0
 MSE_arr = np.empty(N)
 MSE_arr[0] = MSE_k(0)
 MSE += MSE_k(0)
-
+start_time = time.time()
 for k in range(1,n):
     u_k = np.array([u_x[k],u_y[k]])
     # Predict state and covariance matrix
@@ -97,9 +98,10 @@ for k in range(1,n):
     X[k] = X_k
     MSE += MSE_k(k)
     MSE_arr[k] = MSE_k(k)
-
+elapsed_time = time.time() - start_time
 MSE /= N
 print('MSE = ' + str(MSE))
+print('Execution time : '+str(elapsed_time)+' seconds')
 
 #------------------------------------
 # 3 : Plots 

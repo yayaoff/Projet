@@ -2,6 +2,7 @@ import numpy as np
 import random
 import matplotlib.pyplot as plt
 import scipy.stats as scp
+import time
 
 # cov=[[1,0],[0,1]]
 # pdf = lambda x: (1 / (2 * np.pi * np.sqrt(np.linalg.det(cov)))) * np.exp(
@@ -150,15 +151,16 @@ mu=1                    # Mu parameter for random acceleration Gumbel distributi
 beta=1                  # Beta parameter for random acceleration Gumbel distribution
 #       Define the state transition matrix
 
-
+start_time = time.time()
 sol=np.array(particle_filter(input_data,observation_data,dt,N,Np,mean_i,cov_i,mu,beta))
-for i in range(500):
+for i in range(200):
     sol+=np.array(particle_filter(input_data,observation_data,dt,N,Np,mean_i,cov_i,mu,beta))
-
-sol/=501
+elapsed_time = time.time() - start_time
+sol/=201
 
 mse = np.mean((true_data[:2] - sol[:2]) ** 2)
 print("MSE="+str(mse))
+print('Execution time : '+str(elapsed_time)+'seconds')
 
 fig, ax = plt.subplots()
 
