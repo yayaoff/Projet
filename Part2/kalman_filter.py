@@ -1,64 +1,120 @@
 from get_data import *
 import numpy as np
+from math import pi
+import matplotlib.pyplot as plt
 
-# -----------------------------------
+# ----------------------------------------------------------------------------------
 # Kalman filter 
 #       -> Estimate s = (x,y) : position of the boat
+#-----------------------------------------------------------------------------------
+
 #------------------------------------
-
-x_pred = np.zeros(n)
-y_pred = np.zeros(n)
-
 # Informations / Variables 
+#------------------------------------
 dt = 0.1                # [sec]
 gamma = 0.5772          # Euler cste
 mu=1                    # Mu parameter for random acceleration Gumbel distribution
 beta=1                  # Beta parameter for random acceleration Gumbel distribution
+#initial state
+X0_moy = 10
+X0 = np.array([X0_moy,X0_moy,X0_moy,X0_moy])
+X_k = X0
+X = np.empty((n,4))
+X[0] = X0
+
+#------------------------------------
+# Matrices
+#------------------------------------
 #       Define the state transition matrix
-A = np.eye(4)
-#       Define the ... matrix
-B = np.eye(4)
+A = np.array([[1,0,dt,0],[0,1,0,dt],[0,0,1,0],[0,0,0,1]])
+#       Define the control input matrix
+B = np.array([[(dt**2)/2,0],[0,(dt**2)/2],[dt,0],[0,dt]])
+#        Define G matrix
+G = np.array([[(dt**2)/2,0],[0,(dt**2)/2],[dt,0],[0,dt]])
 #        Define the process noise covariance matrix
-Q = np.eye(4)
-#        Define the ... matrix
-P = np.eye(4)
-#        Define the ... matrix
-G = np.eye(4)
-#        Define the ... matrix
-C = np.eye(4)
-#        Define the ... matrix
-R = np.eye(4)
+Q = (pi**2)* (beta**2)/6 * np.dot(G,G.T)
+#        Define the observation matrix
+C = np.array([[1,0,0,0],[0,1,0,0]])
+#        Define the measurement noise covariance matrix
+R = np.eye(2)
 
-# Useful onctions
+#------------------------------------
+# 1 : Initial state 
+#------------------------------------
 
-def kalman_gain(innovation_covariance,predicted_error_covariance):
-    return np.dot(np.dot(P, C.T), np.linalg.inv(np.dot(np.dot(C, P), C.T) + R))
-
-def predict_state_cov(s,u):
-    s[0] = np.dot(A,s[0]) - np.dot(B, u)
-    s[1] = np.dot(A,s[1]) - np.dot(B, u)
-    P = np.dot(np.dot(A, P), A.T) + Q
-    return s,P
-
-def update(K,s,y,P):
-    s[0] += np.dot(K,y-np.dot(C, s[0]))
-    s[1] += np.dot(K,y-np.dot(C, s[1]))
-    P -= np.dot(np.dot(K,C),P)
-
-# 1 : Initial conditions
-
-# initial covariance matrix
 P0_pos = 50
 P0_vel = 10
-P0 = np.diag([P0_pos,P0_pos,P0_vel,P0_vel])
-# initial position and velocity for random normal distribution
-s_0_pos = np.random.normal(10,50,(n,n))
-s_0_vel = np.random.normal(10,10,(n,n))
+#        Define the (initial) predicted error covariance matrix
+P = np.diag([P0_pos,P0_pos,P0_vel,P0_vel])   # P0
 
-# 2 : Run the filter
-#           --> X_pred_k = A*X_pred_k-1 + B*u_k + G (mu + beta*gamma, mu + beta*gamma)
+#------------------------------------
+# Useful functions
+#------------------------------------
 
-for k in range(N):
+def kalman_gain():
+    return np.dot( np.dot(P, C.T), np.linalg.inv( np.add(np.dot(np.dot(C, P), C.T),R)))
+
+def predict(u_k):
+    global P
+    global X_k
+    shift_term = np.array([mu+beta*gamma,mu+beta*gamma,mu+beta*gamma,mu+beta*gamma])
+                # X_pred_k = A*X_pred_k-1 + B*u_k + G (mu + beta*gamma, mu + beta*gamma)
+    X_k = np.dot(A,X_k) + np.dot(B, u_k) + np.dot(Q,shift_term)
+    P = np.dot(np.dot(A, P), A.T) + Q 
+def update(y):
+    global P
+    global X_k
+    # Compute Kalman gain
+    K = kalman_gain()
+    # Update state
+    X_k = np.add(X_k , np.dot(K,y-np.dot(C,X_k)))
+    P = np.subtract(P, np.dot(np.dot(K,C),P))
+
+def MSE_k(k):
+    err = np.array([x_true_pos[k] - X_k[0],y_true_pos[k] - X_k[1]])
+    return np.linalg.norm(err,ord=2)**2 
+
+#------------------------------------
+# Run the filter
+#------------------------------------
+
+MSE = 0
+MSE_arr = np.empty(N)
+MSE_arr[0] = MSE_k(0)
+MSE += MSE_k(0)
+
+for k in range(1,n):
+    u_k = np.array([u_x[k],u_y[k]])
     # Predict state and covariance matrix
-    #Compute Kalman gain
-    pass
+    predict(u_k)
+    # Update state and error covariance matrix
+    y_k = np.array([x_noisy_obs[k],y_noisy_obs[k]])
+    update(y_k)
+    X[k] = X_k
+    MSE += MSE_k(k)
+    MSE_arr[k] = MSE_k(k)
+
+MSE /= N
+print('MSE = ' + str(MSE))
+
+#------------------------------------
+# 3 : Plots 
+#------------------------------------
+
+fig = plt.figure(figsize=(15,10))
+fig = plt.title("Estimated positions - Kalman Filter",fontsize=20,fontweight='bold')
+fig = plt.scatter(x_true_pos,y_true_pos,color='orange',label='True state',s=15)
+fig = plt.scatter(X.T[0],X.T[1],color='green',label='Filtered state',s=15)
+fig = plt.xlabel('x position',fontsize=15)
+fig = plt.ylabel('y position',fontsize=15)
+fig = plt.legend()
+fig = plt.savefig("plots/kalman_filter.png")
+# plt.show()
+fig_MSE = plt.figure(figsize=(15,10))
+fig_MSE = plt.title("Kalman Filter MSE",fontsize=20,fontweight='bold')
+fig_MSE = plt.plot(np.arange(0,N),MSE_arr,label='MSE Kalman filter')
+fig_MSE = plt.xlabel('Iteration',fontsize=15)
+fig_MSE = plt.ylabel('MSE',fontsize=15)
+fig_MSE = plt.legend()
+fig_MSE = plt.savefig("plots/kalman_MSE.png")
+# plt.show()
