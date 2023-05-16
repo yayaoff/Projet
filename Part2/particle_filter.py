@@ -69,9 +69,6 @@ def resample(particles, weights):
     return resampled_particles
 
 
-
-
-
 def particle_filter(input, obs,dt,N,Np,mean_i,cov_i, mu, beta):
     w_k=np.random.gumbel(mu, beta, size=(Np, 2))
     A,B,G=system_mat(dt)
@@ -82,8 +79,8 @@ def particle_filter(input, obs,dt,N,Np,mean_i,cov_i, mu, beta):
     #We initialize initial state x_k
     
     #to store the different results we will find 
-    res=[]
-    res.append(np.mean(particles,axis=0))
+    res=np.empty((N,4))
+    res[0] = np.mean(particles,axis=0)
     particles=np.array([np.mean(particles,axis=0) for _ in range(N)])
 
     for t in range(N-1):
@@ -113,7 +110,7 @@ def particle_filter(input, obs,dt,N,Np,mean_i,cov_i, mu, beta):
         #-------------------------------------------
         #Step 4 : set t=t+1 and restart from step 2
         #-------------------------------------------
-        res.append(np.mean(particles,axis=0))
+        res[t+1] = np.mean(particles,axis=0)
         #this is why we are iteration in a for loop 
     return res
 
@@ -168,8 +165,11 @@ ax.set_title('Comparison of Particle Filter Solution and True Data')
 # Add a legend
 ax.legend()
 
+#Save plot
+plt.savefig('plots/particle.png')
+
 # Show the plot
-plt.show()
+# plt.show()
 
 
 
