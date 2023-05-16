@@ -120,9 +120,9 @@ def particle_filter(input, obs,dt,N,Np,mean_i,cov_i, mu, beta):
 
 
 
-input_data = np.loadtxt('Input.txt')
-observation_data = np.loadtxt('Observations.txt')
-true_data = np.loadtxt('True_data.txt')
+input_data = np.loadtxt('data_files/Input.txt')
+observation_data = np.loadtxt('data_files/Observations.txt')
+true_data = np.loadtxt('data_files/True_data.txt')
 #-------------------------------------------
 #Prep
 #Creating the system 
