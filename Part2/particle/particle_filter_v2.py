@@ -80,9 +80,11 @@ def particle_filter(input, obs,dt,N,Np,mean_i,cov_i, mu, beta):
     #-------------------------------------------
     particles= np.random.multivariate_normal(mean_i, cov_i, size=Np)
     #We initialize initial state x_k
-    particles=np.array([np.mean(particles,axis=0) for _ in range(N)])
+    
     #to store the different results we will find 
     res=[]
+    res.append(np.mean(particles,axis=0))
+    particles=np.array([np.mean(particles,axis=0) for _ in range(N)])
 
     for t in range(N-1):
         #-------------------------------------------
@@ -117,6 +119,7 @@ def particle_filter(input, obs,dt,N,Np,mean_i,cov_i, mu, beta):
 
 
 
+
 input_data = np.loadtxt('Input.txt')
 observation_data = np.loadtxt('Observations.txt')
 true_data = np.loadtxt('True_data.txt')
@@ -140,10 +143,14 @@ beta=1                  # Beta parameter for random acceleration Gumbel distribu
 
 
 sol=np.array(particle_filter(input_data,observation_data,dt,N,Np,mean_i,cov_i,mu,beta))
-for i in range(50):
+for i in range(100):
     sol+=np.array(particle_filter(input_data,observation_data,dt,N,Np,mean_i,cov_i,mu,beta))
 
-sol/=51
+sol/=101
+
+mse = np.mean((true_data[:2] - sol[:2]) ** 2)
+print("MSE="+str(mse))
+
 
 fig, ax = plt.subplots()
 
