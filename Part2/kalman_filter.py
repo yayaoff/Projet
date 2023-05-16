@@ -15,12 +15,6 @@ dt = 0.1                # [sec]
 gamma = 0.5772          # Euler cste
 mu=1                    # Mu parameter for random acceleration Gumbel distribution
 beta=1                  # Beta parameter for random acceleration Gumbel distribution
-#initial state
-X0_moy = 10
-X0 = np.array([X0_moy,X0_moy,X0_moy,X0_moy])
-X_k = X0
-X = np.empty((n,4))
-X[0] = X0
 
 #------------------------------------
 # Matrices
@@ -61,6 +55,7 @@ def predict(u_k):
                 # X_pred_k = A*X_pred_k-1 + B*u_k + G (mu + beta*gamma, mu + beta*gamma)
     X_k = np.dot(A,X_k) + np.dot(B, u_k) + np.dot(Q,shift_term)
     P = np.dot(np.dot(A, P), A.T) + Q 
+
 def update(y):
     global P
     global X_k
@@ -73,6 +68,15 @@ def update(y):
 def MSE_k(k):
     err = np.array([x_true_pos[k] - X_k[0],y_true_pos[k] - X_k[1]])
     return np.linalg.norm(err,ord=2)**2 
+
+#initial state
+X0_moy = 10
+X0 = np.array([X0_moy,X0_moy,X0_moy,X0_moy])
+X_k = X0
+X = np.empty((n,4))
+X[0] = X0
+y_0 = np.array([x_noisy_obs[0],y_noisy_obs[0]])
+update(y_0)
 
 #------------------------------------
 # Run the filter
@@ -102,19 +106,29 @@ print('MSE = ' + str(MSE))
 #------------------------------------
 
 fig = plt.figure(figsize=(15,10))
-fig = plt.title("Estimated positions - Kalman Filter",fontsize=20,fontweight='bold')
-fig = plt.scatter(x_true_pos,y_true_pos,color='orange',label='True state',s=15)
-fig = plt.scatter(X.T[0],X.T[1],color='green',label='Filtered state',s=15)
-fig = plt.xlabel('x position',fontsize=15)
-fig = plt.ylabel('y position',fontsize=15)
-fig = plt.legend()
+fig = plt.title("Estimated positions - Kalman Filter",fontsize=23,fontweight='bold')
+fig = plt.scatter(x_true_pos,y_true_pos,label='True state',s=100)
+fig = plt.scatter(X.T[0],X.T[1],color='orange',label='Filtered state',s=100)
+fig = plt.xlabel('x position',fontsize=20)
+fig = plt.ylabel('y position',fontsize=20)
+fig = plt.legend(fontsize=20)
 fig = plt.savefig("plots/kalman_filter.png")
 # plt.show()
 fig_MSE = plt.figure(figsize=(15,10))
-fig_MSE = plt.title("Kalman Filter MSE",fontsize=20,fontweight='bold')
+fig_MSE = plt.title("Kalman Filter MSE",fontsize=23,fontweight='bold')
 fig_MSE = plt.plot(np.arange(0,N),MSE_arr,label='MSE Kalman filter')
-fig_MSE = plt.xlabel('Iteration',fontsize=15)
-fig_MSE = plt.ylabel('MSE',fontsize=15)
-fig_MSE = plt.legend()
+fig_MSE = plt.xlabel('Iteration',fontsize=20)
+fig_MSE = plt.ylabel('MSE',fontsize=20)
+fig_MSE = plt.legend(fontsize=20)
 fig_MSE = plt.savefig("plots/kalman_MSE.png")
 # plt.show()
+text = 'MSE = '+str(MSE)
+bbox_props = dict(boxstyle='round', facecolor='white', edgecolor='black',pad=0.6)
+fig_err = plt.figure(figsize=(15,10))
+fig_err = plt.title("Kalman Filter Error",fontsize=23,fontweight='bold')
+fig_err = plt.hist(MSE_arr,bins=10,color='green',alpha=0.4,edgecolor='black')
+fig_err = plt.text(0.65, 0.95,text, fontsize =18, ha='left', va='top', bbox=bbox_props,transform=plt.gca().transAxes)
+fig_err = plt.xlabel('Error',fontsize=20)
+fig_err = plt.ylabel('Frequence',fontsize=20)
+fig_err = plt.legend(fontsize=20)
+fig_err = plt.savefig("plots/kalman_Err.png")
