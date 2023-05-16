@@ -174,12 +174,16 @@ ax.scatter(sol[:, 0], sol[:, 1],color='orange', label='Particle Filter Solution'
 ax.set_xlabel('X-axis')
 ax.set_ylabel('Y-axis')
 ax.set_title('Comparison of Particle Filter Solution and True Data')
+# Afficher mse sur le plot
+text = 'MSE = '+str(round(mse,2))
+bbox_props = dict(boxstyle='round', facecolor='white', edgecolor='black',pad=0.2)
+plt.text(0.75, 0.05, text, fontsize=10, ha='left', va='bottom', bbox=bbox_props, transform=plt.gca().transAxes)
 
 # Add a legend
 ax.legend()
 
 #Save plot
-plt.savefig('plots/particle_nul_4.png')
+plt.savefig('plots/particle_nul_1.png')
 
 # Show the plot
 # plt.show()
