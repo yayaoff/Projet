@@ -43,36 +43,14 @@ def compute_weights(particles, observations, N):
     weights = np.zeros(len(particles))
 
     for i in range(len(particles)):
-        # Calculate predicted observation using x
-        # TODO
-        # x = particles[i]
         # Calculate the difference between predicted observation and actual observation
-        #diff = observations[i] - particles[i,:2]
-        # if(i==0):
-        #     print("obs shape : "+str(observations.shape))
-        #     print("part shape : "+str(particles.shape))
 
         diff = observations - particles[i,:2]
-        #diff = np.array([observations[0] - particles[i][0],observations[0] - particles[i][1]])
-                        
-        # Calculate the weight using the difference and a normal distribution
-        #weight = 1 / np.sqrt(2 * np.pi) * np.exp(-0.5 * (diff**2))
-        #print( scp.norm.pdf(diff,loc=0,scale=1))
-        #weights[i]=scp.norm.pdf(diff,loc=0,scale=1).prod()
-
-        # mult_norm = scp.multivariate_normal(mean=[0,0],cov=[[1,0],[0,1]])
-        # weights[i] = mult_norm.pdf(diff)
-
         weights[i] = pdf(diff)
 
         if(weights[i]==0):
             weights[i]+=1e-12
 
-    # sum = np.sum(weights)
-    # if sum ==0:
-    #     sum += 1e-12
-    # weights /= sum #diviser par la norme
-    # print(weights)
     norm = np.linalg.norm(weights)
     if norm ==0:
         norm += 1e-12
@@ -96,28 +74,22 @@ def particle_filter(input, obs,dt,N,Np,mean_i,cov_i, mu, beta):
     #to store the different results we will find 
     res=np.empty((N,4))
     res[0] = np.mean(particles,axis=0)
-    # particles=np.array([np.mean(particles,axis=0) for _ in range(Np)])
 
     for t in range(N-1):
         #-------------------------------------------
         #Step 2: Prediction 
         #-------------------------------------------
-        #TODO
         #faut mettre les bons vecteurs
         particles=Prediction(particles,input[t],w_k)
 
         #-------------------------------------------
         #Step 3: Update
         #-------------------------------------------
-        #                 #Compute the weights and normalize them 
-        #TODO
-        #weights = compute_weights(particles, obs, len(obs))
-        weights = compute_weights(particles, obs[t+1], len(obs))
+        #Compute the weights and normalize them 
         #Estimate theta t+1
-        #TODO
+        weights = compute_weights(particles, obs[t+1], len(obs))
 
         #Resample
-        #TODO
         particles = resample(particles, weights)
         #-------------------------------------------
 
@@ -153,10 +125,10 @@ beta=1                  # Beta parameter for random acceleration Gumbel distribu
 
 start_time = time.time()
 sol=np.array(particle_filter(input_data,observation_data,dt,N,Np,mean_i,cov_i,mu,beta))
-# for i in range(50):
-#     sol+=np.array(particle_filter(input_data,observation_data,dt,N,Np,mean_i,cov_i,mu,beta))
+for i in range(500):
+    sol+=np.array(particle_filter(input_data,observation_data,dt,N,Np,mean_i,cov_i,mu,beta))
 elapsed_time = time.time() - start_time
-# sol/=51
+sol/=501
 
 mse = np.mean((true_data[:2] - sol[:2]) ** 2)
 print("MSE="+str(mse))
@@ -183,7 +155,7 @@ plt.text(0.75, 0.05, text, fontsize=10, ha='left', va='bottom', bbox=bbox_props,
 ax.legend()
 
 #Save plot
-plt.savefig('plots/particle_nul_1.png')
+plt.savefig('plots/particle_500_1.png')
 
 # Show the plot
 # plt.show()
