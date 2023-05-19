@@ -34,15 +34,6 @@ C = np.array([[1,0,0,0],[0,1,0,0]])
 R = np.eye(2)
 
 #------------------------------------
-# 1 : Initial state 
-#------------------------------------
-
-P0_pos = 50
-P0_vel = 10
-#        Define the (initial) predicted error covariance matrix
-P = np.diag([P0_pos,P0_pos,P0_vel,P0_vel])   # P0
-
-#------------------------------------
 # Useful functions
 #------------------------------------
 
@@ -70,7 +61,15 @@ def MSE_k(k):
     err = np.array([x_true_pos[k] - X_k[0],y_true_pos[k] - X_k[1]])
     return np.linalg.norm(err,ord=2)**2 
 
-#initial state
+#------------------------------------
+# 1 : Initial state and covariance matrix
+#------------------------------------
+
+P0_pos = 50
+P0_vel = 10
+#        Define the (initial) predicted error covariance matrix
+P = np.diag([P0_pos,P0_pos,P0_vel,P0_vel])   # P0
+
 X0_moy = 10
 X0 = np.array([X0_moy,X0_moy,X0_moy,X0_moy])
 X_k = X0

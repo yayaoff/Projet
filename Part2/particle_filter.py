@@ -121,14 +121,13 @@ dt = 0.1                # [sec]
 gamma = 0.5772          # Euler cste
 mu=1                    # Mu parameter for random acceleration Gumbel distribution
 beta=1                  # Beta parameter for random acceleration Gumbel distribution
-#       Define the state transition matrix
 
 start_time = time.time()
 sol=np.array(particle_filter(input_data,observation_data,dt,N,Np,mean_i,cov_i,mu,beta))
-for i in range(500):
+for i in range(10):
     sol+=np.array(particle_filter(input_data,observation_data,dt,N,Np,mean_i,cov_i,mu,beta))
 elapsed_time = time.time() - start_time
-sol/=501
+sol/=11
 
 mse = np.mean((true_data[:2] - sol[:2]) ** 2)
 print("MSE="+str(mse))
